@@ -1,6 +1,7 @@
 const path = require("path");
 const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = {
   entry: ["./src/client/index.js"],
@@ -19,6 +20,7 @@ module.exports = {
         test: /\.(js|jsx)$/,
         use: {
           loader: "babel-loader",
+          exclude: /node_modules/,
           options: {
             presets: ["@babel/preset-react"]
           }
@@ -26,31 +28,15 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: [
-          {
-            loader: "style-loader"
-          },
-          {
-            loader: "css-loader"
-          }
-        ]
+        use: [MiniCssExtractPlugin.loader,"css-loader"]
       },
       {
-        test: /\.html$/,
-        use: [
-          {
-            loader: "html-loader"
-          }
-        ]
-      },
-      {
-        test: /\.(png|svg|jpg|gif|jpeg)$/,
+        test: /\.jpg|png$/,
         use: [
           {
             loader: "file-loader",
             options: {
-              name: "assets/images/[name].[ext]",
-              esModule: false
+              name: "images/[name]-[hash:8].[ext]"
             }
           }
         ]
@@ -61,6 +47,10 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, "public/index.html")
     }),
-    new webpack.HotModuleReplacementPlugin()
+    new webpack.HotModuleReplacementPlugin(),
+    new MiniCssExtractPlugin({
+      filename: '[name].[contenthash:8].css',
+      chunkFilename: `[name].[contenthash:8].chunk.css`
+    })
   ]
 };
