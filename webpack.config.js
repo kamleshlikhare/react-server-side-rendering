@@ -18,9 +18,9 @@ module.exports = {
     rules: [
       {
         test: /\.(js|jsx)$/,
+        exclude: /node_modules/,
         use: {
           loader: "babel-loader",
-          exclude: /node_modules/,
           options: {
             presets: ["@babel/preset-react"]
           }
@@ -28,10 +28,32 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader,"css-loader"]
+        use: [MiniCssExtractPlugin.loader, "css-loader"]
       },
       {
-        test: /\.jpg|png$/,
+        test: /\.s[ac]ss$/i,
+        use: [
+          MiniCssExtractPlugin.loader,
+          "css-loader",
+          {
+            loader: 'postcss-loader', // Run post css actions
+            options: {
+              plugins: function () { // post css plugins, can be exported to postcss.config.js
+                return [
+                  require('precss'),
+                  require('autoprefixer')
+                ];
+              }
+            }
+          },
+
+          {
+            loader: "sass-loader"
+          }
+        ]
+      },
+      {
+        test: /\.(jpg|png|jpeg|gif|svg)$/,
         use: [
           {
             loader: "file-loader",
@@ -40,6 +62,10 @@ module.exports = {
             }
           }
         ]
+      },
+      {
+        test: /\.(woff|woff2|eot|ttf|otf)$/,
+        use: ["file-loader"]
       }
     ]
   },
@@ -49,7 +75,7 @@ module.exports = {
     }),
     new webpack.HotModuleReplacementPlugin(),
     new MiniCssExtractPlugin({
-      filename: '[name].[contenthash:8].css',
+      filename: "[name].[contenthash:8].css",
       chunkFilename: `[name].[contenthash:8].chunk.css`
     })
   ]
